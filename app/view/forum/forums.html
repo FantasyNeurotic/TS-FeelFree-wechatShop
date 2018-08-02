@@ -1,0 +1,148 @@
+{% extends "_layouts/admin.html" %}
+
+{% block style %}
+    <link href="/public/css/_lib/ladda/ladda-themeless.min.css">
+   <style type="text/css">
+        [v-cloak] { display: none; }
+        .col-lg-4 img {
+            max-width: 100%;
+        }
+        .img-preview{
+            width: 50px;
+        }
+        .forum-icon{
+            height: 42px;
+        }
+   </style>
+{% endblock %}
+{% block admin %}
+{% include "../vue_components/pagination.html" %}
+
+<div class="row" id="app" v-cloak>
+    <div class="col-lg-12">
+        <div class="ibox-content m-b-sm border-bottom">
+                <div class="p-xs">
+                <div class="pull-left m-r-md">
+                    <i class="fa fa-globe text-navy mid-icon"></i>
+                </div>
+                <h2></h2>
+                <span>
+                    你可以自由选择你感兴趣的话题,您也可以<a @click="createForum" style="vertical-align: baseline;" class="btn text-navy">新建板块</a>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-12">
+        <div class="col-sm-12">
+            <div class="ibox">
+                <div class="ibox-content forum-container">
+                    <template v-for="(forum, index) of forums">
+                        <div @mouseover="mouseover(forum._id)" @mouseout="mouseout(forum._id)" :class="['forum-item', hovers[forum._id] ? 'active': '']">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <div class="forum-icon">
+                                        <template v-if="forum.icon">
+                                            <img class="forum-icon" :src="forum.icon | formatImage">
+                                        </template>
+                                        <template v-else>
+                                            <i class="fa fa-shield"></i>
+                                        </template>
+                                    </div>
+                                    <a :href="'/forums/'+ forum._id" class="forum-item-title">${forum.title}</a>
+                                    <div class="forum-sub-title">${forum.description}</div>
+                                </div>
+                                <div class="col-md-1 forum-info">
+                                    <span class="views-number">
+                                        ${forum.visit_count}
+                                    </span>
+                                    <div>
+                                        <small>浏览</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-1 forum-info">
+                                    <span class="views-number">
+                                        ${forum.topic_count || 0}
+                                    </span>
+                                    <div>
+                                        <small>主题</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-1 forum-info">
+                                    <span class="views-number">
+                                        ${forum.post_count || 0}
+                                    </span>
+                                    <div>
+                                        <small>帖子</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <pagination-component  @renderdata="renderData" :size="10" :link="forumsUrl"  />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="id_modal_forum" role="dialog" aria-hidden="true">
+        <div class="modal-dialog ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title">
+                        新建板块
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <a @click="selectForumIcon" class="btn btn-xs m-l-md text-navy">
+                                选择板块图标
+                                <i class="fa fa-picture-o"></i>
+                            </a>
+                            <input type="file" id="forum_icon_preview"  style="display:none" class="form-control">
+                            <div class="m-l-lg">
+                                <img v-if="forum.icon" alt="image" class="img-preview" :src="forum.icon | formatImage">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <div class="col-sm-12">
+                                    <label>名称</label>
+                                    <input class="form-control" v-model="forum.title">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <div class="col-sm-12">
+                                    <label>描述</label>
+                                    <textarea rows="3" class="form-control" v-model="forum.description"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button @click="btnSave" type="button" class="btn btn-primary">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script  src="/public/js/_lib/ladda/spin.min.js"></script>
+<script  src="/public/js/_lib/ladda/ladda.min.js"></script>
+<script  src="/public/js/_lib/ladda/ladda.jquery.min.js"></script>
+<script type="text/javascript" src="/public/js/_lib/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/public/js/_lib/jquery-ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/public/js/_lib/fileupload/jquery.fileupload.js"></script>
+<script  src="/public/js/forum/forum.js"></script>
+{% endblock %}
+

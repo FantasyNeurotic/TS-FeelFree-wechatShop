@@ -1,0 +1,33 @@
+{
+    "extends": "eslint:recommended",
+    "env": {
+        "browser": true,
+        "jquery": true,
+        "es6": false
+    },
+    "globals": {
+        "$": false,
+        "moment": false,
+        "EventBus": false,
+        "Vue": false,
+        "T": false,
+        "_": false,
+        "$blogId": false,
+        "$topicId": false,
+        "$forum_id":false,
+        "$topic_id":false,
+        "$user_name": false,
+        "toastr":false
+    },
+    "rules": {
+        "no-console": "off",
+        "no-unused-vars": [
+            "error",
+            {
+                "vars": "all",
+                "args": "none",
+                "ignoreRestSiblings": false
+            }
+        ]
+    }
+}

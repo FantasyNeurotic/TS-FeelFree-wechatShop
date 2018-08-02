@@ -1,0 +1,181 @@
+{% extends "_layouts/admin.html" %}
+
+{% block style %}
+   <style type="text/css">
+        [v-cloak] { display: none; }
+        #app img {
+            max-width: 100%;
+        }
+        .pointer{
+            cursor: pointer;
+        }
+        .h-30{
+            min-height: 30px;
+        }
+        .editable {
+            padding: 5px;
+            background: #f6f6f6;
+            border: 1px solid #ebebeb;
+        }
+        .reply-info{
+            color: #8590a6;
+        }
+   </style>
+{% endblock %}
+{% block admin %}
+{% include "../vue_components/pagination.html" %}
+
+<div class="row article" id="app" v-cloak>
+    <div class="col-lg-8">
+        <template v-for="(blog, index) in blogs">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <a title="点击查看详情" @click="showDetail(blog)" class="btn-link">
+                        <h2>
+                            ${blog.title}
+                        </h2>
+                    </a>
+                    <div class="small m-b-xs">
+                        <strong class="m-r-md">${blog.author_user}</strong> <span class="text-muted"><i class="fa fa-clock-o"></i>&nbsp;${blog.create_at | formatTime}</span>
+                    </div>
+                    <p v-html="blog.content" />
+                    <hr/>
+                    <div class="row">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6">
+                            <div v-show="showReply[blog._id]" class="small text-right">
+                                <div @click="hideReplyList(blog._id)" class="pointer">
+                                    <a class="text-navy">收起评论</a>
+                                </div>
+                            </div>
+                            <div v-show="!showReply[blog._id]" class="small text-right">
+                                <div @click="showReplyList(blog._id)" class="pointer"> 
+                                    <i class="fa fa-comments-o"> </i> ${blog.reply_count} 条评论 
+                                </div>
+                                <i class="fa fa-eye"> </i> ${blog.visit_count} 个阅读
+                            </div>
+                        </div>
+                    </div>
+                    <div v-show="showReply[blog._id]" class="row reply-container">
+                        <div class="col-lg-12">
+                            <h3>${blog.reply_count} 条评论 </h3>
+                            <div v-for="(reply, index) of blog.replies" :key="index" class="social-feed-box">
+                                <div class="social-avatar">
+                                    <a class="pull-left">
+                                        <img alt="image" :src="reply.avatar | formatAvatar"/>
+                                    </a>
+                                    <div class="media-body">
+                                        <template v-if="reply.replyId">
+                                        <a>
+                                            ${reply.author_user} 
+                                            ${formatIfMeOrAuthor(blog,reply,reply.author_user)} 
+                                            <span class="m-l-xs m-r-xs reply-info">
+                                                回复
+                                            </span>
+                                            ${formatReplyId(blog,reply.replyId)}
+                                            ${formatIfMeOrAuthor(blog,reply)} 
+                                        </a>
+                                        </template>
+                                        <template v-else>
+                                        <a>
+                                            ${reply.author_user}
+                                            ${formatIfMeOrAuthor(blog,reply, reply.author_user)} 
+                                        </a>
+                                        </template>
+                                        <small class="text-muted">${reply.create_at | formatTime}</small>
+                                    </div>
+                                </div>
+                                <div class="social-body">
+                                    <p v-html="reply.content"></p>
+                                    <div @mouseover ="onMouseOver(reply._id)" @mouseout="onMouseOut(reply._id)"> 
+                                        <a @click="starReply(reply)" class="btn btn-xs text-navy"><i class="fa fa-thumbs-o-up"></i> ${reply.stars.length}</a>
+                                        <a @click="activeReply(reply)" v-show="hoverReply[reply._id] && reply.author_user !== user_name" class="btn btn-xs text-navy m-l-md"><i class="fa fa-reply"></i> 回复</a>
+                                        <a @click="showSessionModal(blog,reply)" v-show="hoverReply[reply._id] && reply.replyId" class="btn btn-xs text-navy"><i class="fa fa-comment-o"></i> 查看对话</a>
+                                        <a v-show="hoverReply[reply._id] && (reply.author_user !== user_name)" class="btn btn-xs text-warning"><i class="fa fa-thumbs-o-down"></i> 踩</a>
+                                        <a v-show="hoverReply[reply._id] && reply.author_user !== user_name" class="btn btn-xs text-danger"><i class="fa fa-bell-o"></i> 举报</a>
+                                    </div>
+                                    <div v-show="activeCurrentReply[reply._id]" class="m-t-sm">
+                                        <div :ref="reply._id" @blur="reply_blur($event,reply)" @focus="reply_focus($event,reply._id)" contentEditable class="h-30 editable m-b-sm">
+                                            ${reply_placeholders[reply._id]}
+                                        </div>
+                                        <a @click="cancelReply(reply._id)" class="btn btn-xs text-warning">取消</a>
+                                        <a @click="replingBlogReply(blog,reply)" class="btn btn-xs text-navy">回复</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div @blur="blur($event,blog._id)" @focus="focus($event,blog._id)" contentEditable class="h-30 editable">
+                                ${placeholders[blog._id]}
+                            </div>
+                            <button @click="replyBlog(blog._id)" type="button" class="btn btn-primary btn-xs m-t-sm">评论</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <pagination-component @renderdata="renderData" :size="10" link="/api/v1/blog"  />
+    </div>
+    <div class="col-lg-12">
+        <div v-if="noBlog" class="m-t-lg alert alert-info">
+            暂时没有内容哦，请移步个人中心写一篇吧！
+            <a href="/blogs/create" class=" btn text-navy">确定</button>
+        </div>
+        
+    </div>
+    <div class="modal" id="id_modal_session" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-small">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title">
+                        查看对话
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div v-for="(reply, index) of session_content" :key="index" class="social-feed-box">
+                        <div class="social-avatar">
+                            <a class="pull-left">
+                                <img alt="image" :src="reply.avatar | formatAvatar"/>
+                            </a>
+                            <div class="media-body">
+                                <template v-if="reply.replyId">
+                                <a>
+                                    ${reply.author_user} 
+                                    ${formatIfMeOrAuthor(null,reply, reply.author_user)}
+                                    <span class="m-l-xs m-r-xs reply-info">
+                                        回复
+                                    </span>
+                                    ${formatReplyId(null,reply.replyId)}
+                                    ${formatIfMeOrAuthor(null,reply)}
+                                </a>
+                                </template>
+                                <template v-else>
+                                <a>
+                                    ${reply.author_user}
+                                    ${formatIfMeOrAuthor(null,reply, reply.author_user)} 
+                                </a>
+                                </template>
+                                <small class="text-muted">${reply.create_at | formatTime}</small>
+                            </div>
+                        </div>
+                        <div class="social-body">
+                            <p v-html="reply.content"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    var $user_name = '{{ user_name}}';
+</script>
+<script src="/public/js/blog/index.js"></script>
+{% endblock %}
+

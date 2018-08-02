@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8" />
+    <title nb-bind='title'>{{title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge, chrome=1">
+    <script src="/public/js/_lib/vue/vue.js"></script>
+    <script src="/public/js/_lib/underscore/underscore.js"></script>
+    <script src="/public/js/_lib/moment/moment.js"></script>
+    <script src="/public/js/_lib/moment/zn-cn.js"></script>
+    <script src="/public/js/common/utils.js"></script>
+    <script type="text/javascript">
+        EventBus = new Vue()
+    </script> 
+    {% block style %}
+     {% endblock %}
+</head>
+
+<body>
+    {% block e %}
+    {% endblock %}
+</body>
+
+
+    <script type="text/javascript" src="/public/js/_lib/jquery/jquery-3.1.1.min.js"></script>
+    {% block script %}
+    {% endblock %}
+</body>

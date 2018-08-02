@@ -1,0 +1,77 @@
+{% extends "_layouts/e.html" %} {% block style %}
+<style type="text/css">
+    [v-cloak] {
+        display: none;
+    }
+
+    .avatar {
+        cursor: pointer;
+    }
+
+    .body {
+        margin: 0;
+        padding: 50px;
+        font: 16px/1.5 Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        color: #333;
+        font-weight: 300;
+    }
+
+    .wrapper {
+        width: 950px;
+        margin: 0 auto;
+        *zoom: 1;
+    }
+
+    .wrapper:before,
+    .wrapper:after {
+        display: table;
+        content: " ";
+    }
+
+    .wrapper:after {
+        clear: both;
+    }
+
+    .content-home .avatar img {
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+    }
+    .name {
+    font-family: 'calligraffittiregular';
+    font-size: 26px;
+    font-weight: bold;
+    font-style: normal;
+    line-height: 50px;
+    height: 50px;
+    margin: 0 auto;
+    letter-spacing: -.03em;
+  }
+</style>
+{% endblock %} {% block e %}
+<div id="app" class="body">
+    <div>
+        <div class="content-home text-center"> <a class="avatar" href="/"><img alt="image" :src="userInfo.avatar | formatAvatar" /></a></div>
+        <div>${userInfo.nickname}</div>
+
+    </div>
+    <div class="wrapper">
+        <template v-for="(blog, index) of blogs">
+            <div>
+                <h2>
+                    ${blog.title}
+                </h2>
+                <p v-html="blog.content"></p>
+                <div>${blog.update_at | formatTime}</div>
+            </div>
+        </template>
+    </div>
+</div>
+
+{% endblock %} {% block script %}
+
+<script type="text/javascript">
+    var $userId = '{{ userId}}';
+</script>
+<script type="text/javascript" src="/public/js/user/show.js"></script> {% endblock %}

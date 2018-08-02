@@ -1,0 +1,60 @@
+{% extends "_layouts/admin.html" %} {% block style %}
+<style type="text/css">
+    [v-cloak] {
+        display: none;
+    }
+
+    .avatar {
+        cursor: pointer;
+    }
+</style>
+{% endblock %} {% block admin %}
+<div class="row animated fadeInRight" id="profile" v-cloak>
+    <div class="col-md-4">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <h5>个人中心</h5>
+            </div>
+            <div>
+                <div>
+                    <input v-model="user.declaration" />
+                </div>
+                <div>
+                    <div>
+                        <div>
+                            <template v-for="(label, index) in user.labels">
+                                <span><input v-model="label.url"></input></span>
+                                <span><img alt="image" @click="uploadTag(index)" class="img-responsive" :src="label.avatar | formatAvatar"></span>
+                                <button @click="removeLabel(index)">删除</button>
+                            </template></div>
+                        <button @click="addLabels">新增标签</button>
+                    </div>
+                   
+                </div>
+                <img alt="image" @click="upload" class="img-responsive" :src="user.avatar | formatAvatar">
+                <div class="ibox-content no-padding border-left-right avatar">
+                    <input type="file" id="id_upload" style="display:none;">
+                </div>
+            </div>
+        </div>
+        <div>
+            <button @click="setUserInfo">保存</button>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %} {% block script %}
+<script type="text/javascript" src="/public/js/_lib/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/public/js/_lib/jquery-ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/public/js/_lib/fileupload/jquery.fileupload.js"></script>
+<script type="text/javascript">
+
+</script>
+<script type="text/javascript" src="/public/js/user/profile.js"></script> {% endblock %}
